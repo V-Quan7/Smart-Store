@@ -1,20 +1,22 @@
 "use client"
 import React from "react";
-import { assets } from "@/assets/assets";
+import { assets, BagIcon, BoxIcon, CartIcon, HomeIcon } from "@/assets/assets";
 import Link from "next/link"
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useClerk, UserButton } from "@clerk/nextjs";
 
 const Navbar = () => {
 
-  const { isSeller, router } = useAppContext();
+  const { isSeller, router, user } = useAppContext();
   const pathname = usePathname();
+
+  const { openSignIn } = useClerk();
 
   if (pathname.startsWith('/seller')) {
     return null; // Don't render the Navbar on seller pages
   }
-
   const menuItems = [
     { name: "Home", href: "/" },
     { name: "Shop", href: "/all-products" },
@@ -56,10 +58,21 @@ const Navbar = () => {
         </div>
         <ul className="hidden md:flex items-center gap-4 ">
           <Image className="w-4 h-4" src={assets.search_icon} alt="search icon" />
-          <button className="flex items-center gap-2 hover:text-gray-900 transition">
-            <Image src={assets.user_icon} alt="user icon" />
-            Account
-          </button>
+          {user
+            ? <>
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action label="Cart" labelIcon={<CartIcon />} onClick={() => router.push('/cart')} />
+                  <UserButton.Action label="My Order" labelIcon={<BagIcon />} onClick={() => router.push('/my-orders')} />
+                </UserButton.MenuItems>
+              </UserButton>
+            </>
+            :
+            <button onClick={openSignIn} className="flex items-center gap-2 hover:text-gray-900 transition">
+              <Image src={assets.user_icon} alt="user icon" />
+              Account
+            </button>
+          }
           <Link href="/cart" className="hover:text-gray-900 transition text-orange-500">
             <button className="flex items-center gap-2 hover:text-gray-900 transition">
               <Image src={assets.cart_icon} alt="user icon" />
@@ -70,11 +83,23 @@ const Navbar = () => {
         {/* -------------------------mobile menu------------------------------- */}
         <div className="flex items-center md:hidden gap-3">
           {/* Account button */}
-          <button className="flex items-center gap-2 hover:text-gray-900 transition">
-            <Image src={assets.user_icon} alt="user icon" />
-            Account
-          </button>
-
+          {user
+            ? <>
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action label="Home" labelIcon={<HomeIcon />} onClick={() => router.push('/')} />
+                  <UserButton.Action label="Products" labelIcon={<BoxIcon />} onClick={() => router.push('/all-products')} />
+                  <UserButton.Action label="Cart" labelIcon={<CartIcon />} onClick={() => router.push('/cart')} />
+                  <UserButton.Action label="My Order" labelIcon={<BagIcon />} onClick={() => router.push('/my-orders')} />
+                </UserButton.MenuItems>
+              </UserButton>
+            </>
+            :
+            <button onClick={openSignIn} className="flex items-center gap-2 hover:text-gray-900 transition">
+              <Image src={assets.user_icon} alt="user icon" />
+              Account
+            </button>
+          }
           {/* Cart button */}
           <Link href="/cart">
             <button className="flex items-center gap-2 text-orange-500 hover:text-gray-900 transition">
