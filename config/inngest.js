@@ -1,7 +1,6 @@
 import { Inngest } from "inngest";
-import connectDb from "./db";
 import connectDB from "./db";
-
+import User from "@/models/User";
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "smart-store" });
 
@@ -36,6 +35,7 @@ export const syncUserUpdation = inngest.createFunction(
         await connectDB();
         await User.findByIdAndUpdate(id, userData);
         console.log('User updated:', userData);
+        console.log("MONGODB_URI in Inngest:", process.env.MONGODB_URI);
     }
 )
 
@@ -43,7 +43,7 @@ export const syncUserUpdation = inngest.createFunction(
 // inngest function to delete user data from a database
 export const syncUserDetetion = inngest.createFunction(
     { id: 'sync-user-delete-from-clerk' },
-    { event: 'clerk/user.delated' },
+    { event: 'clerk/user.deleted' },
     async ({ event }) => {
         const { id } = event.data;
         await connectDB();
